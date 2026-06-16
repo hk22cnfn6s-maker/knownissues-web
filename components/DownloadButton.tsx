@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Button from '@/components/ui/Button'
 
 type State =
   | { status: 'idle' }
@@ -45,10 +46,10 @@ export default function DownloadButton({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-3">
-      <button
+      <Button
         onClick={handleDownload}
         disabled={state.status === 'loading' || state.status === 'done'}
-        className="inline-flex items-center gap-2 bg-black text-white text-sm font-semibold px-5 py-2.5 rounded hover:bg-gray-800 disabled:opacity-50 transition-colors"
+        variant="primary"
       >
         {state.status === 'loading' && (
           <svg
@@ -77,21 +78,20 @@ export default function DownloadButton({ slug }: { slug: string }) {
           : state.status === 'done'
           ? '✓ Download started'
           : 'Download guide (PDF)'}
-      </button>
+      </Button>
 
       {state.status === 'error' && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 max-w-md">
+        <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2 max-w-md">
           {state.message}
         </p>
       )}
 
       {state.status === 'done' && (
-        <p className="text-sm text-gray-500">
-          Your download should begin automatically and we've also emailed you
-          a copy. If it doesn't start,{' '}
+        <p className="text-sm text-text-secondary">
+          Delivered instantly — also emailed to you. If it doesn't start,{' '}
           <button
             onClick={handleDownload}
-            className="underline underline-offset-2 text-black"
+            className="underline underline-offset-2 text-accent hover:text-accent-hover"
           >
             try again
           </button>

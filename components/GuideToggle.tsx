@@ -34,10 +34,10 @@ export default function GuideToggle({
     <button
       onClick={handleToggle}
       disabled={loading}
-      className={`text-xs font-semibold px-3 py-1.5 rounded border transition-colors disabled:opacity-50 ${
+      className={`text-xs font-semibold px-3 py-1.5 rounded-sm border transition-colors disabled:opacity-50 ${
         published
-          ? 'border-black bg-black text-white hover:bg-gray-800'
-          : 'border-gray-300 text-gray-600 hover:border-black hover:text-black'
+          ? 'border-accent bg-accent text-white hover:bg-accent-hover'
+          : 'border-border text-text-secondary hover:border-text-primary hover:text-text-primary'
       }`}
     >
       {loading ? '…' : published ? 'Published' : 'Unpublished'}

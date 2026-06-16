@@ -31,9 +31,12 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Protected routes — redirect to /login if not authenticated
+  // Protected routes — redirect to /login if not authenticated.
+  // /guides/[slug] is intentionally NOT protected here: the guide detail
+  // page is publicly viewable (preview + "register to download" gate),
+  // only the listing at the exact /guides path requires a session.
   const protectedPaths = ['/dashboard', '/guides']
-  const isProtected = protectedPaths.some((p) => pathname.startsWith(p))
+  const isProtected = protectedPaths.some((p) => pathname === p)
 
   if (isProtected && !user) {
     const loginUrl = request.nextUrl.clone()
