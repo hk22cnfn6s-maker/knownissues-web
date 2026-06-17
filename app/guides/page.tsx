@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { extractYearRange } from '@/lib/guide-display'
-import type { Guide } from '@/types'
+import { extractYearRange, groupGuidesByManufacturer } from '@/lib/guide-display'
+import type { Guide, Manufacturer } from '@/types'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import GuideCard from '@/components/ui/GuideCard'
+import ManufacturerGroupHeading from '@/components/ui/ManufacturerGroup'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,10 +32,10 @@ export default async function GuidesPage() {
 
   if (!profile?.is_verified) redirect('/verify')
 
-  const [{ data: guides }, { data: downloadsRaw }] = await Promise.all([
+  const [{ data: guides }, { data: downloadsRaw }, { data: manufacturers }] = await Promise.all([
     service
       .from('guides')
-      .select('id, title, slug, description, created_at')
+      .select('id, title, slug, description, manufacturer_id, created_at')
       .eq('is_published', true)
       .order('created_at', { ascending: false }),
     service
@@ -42,12 +43,21 @@ export default async function GuidesPage() {
       .select('downloaded_at, guides(title, slug)')
       .eq('user_id', user.id)
       .order('downloaded_at', { ascending: false }),
+    service
+      .from('manufacturers')
+      .select('id, name, slug, logo_filename, display_order, created_at')
+      .order('display_order', { ascending: true }),
   ])
 
   const downloads = (downloadsRaw ?? []) as unknown as Array<{
     downloaded_at: string
     guides: { title: string; slug: string } | null
   }>
+
+  const groups = groupGuidesByManufacturer(
+    (guides ?? []) as Guide[],
+    (manufacturers ?? []) as Manufacturer[]
+  )
 
   return (
     <>
@@ -96,19 +106,26 @@ export default async function GuidesPage() {
             Available guides
           </h2>
 
-          {!guides || guides.length === 0 ? (
+          {groups.length === 0 ? (
             <p className="text-text-muted">No guides available yet.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(guides as Guide[]).map((guide) => (
-                <GuideCard
-                  key={guide.id}
-                  title={guide.title}
-                  slug={guide.slug}
-                  description={guide.description}
-                  badge={extractYearRange(guide.title)}
-                  ctaLabel="View Guide"
-                />
+            <div className="space-y-12">
+              {groups.map((group) => (
+                <div key={group.manufacturer?.id ?? 'other'}>
+                  <ManufacturerGroupHeading manufacturer={group.manufacturer} />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {group.guides.map((guide) => (
+                      <GuideCard
+                        key={guide.id}
+                        title={guide.title}
+                        slug={guide.slug}
+                        description={guide.description}
+                        badge={extractYearRange(guide.title)}
+                        ctaLabel="View Guide"
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}

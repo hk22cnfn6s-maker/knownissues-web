@@ -1,10 +1,11 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { extractYearRange } from '@/lib/guide-display'
-import type { Guide } from '@/types'
+import { extractYearRange, groupGuidesByManufacturer } from '@/lib/guide-display'
+import type { Guide, Manufacturer } from '@/types'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import Button from '@/components/ui/Button'
 import GuideCard from '@/components/ui/GuideCard'
+import ManufacturerGroupHeading from '@/components/ui/ManufacturerGroup'
 import HowItWorks from '@/components/sections/HowItWorks'
 import TrustSection from '@/components/sections/TrustSection'
 
@@ -18,11 +19,22 @@ export default async function Home() {
   // visitors too, so this bypasses the guides RLS policy (which otherwise
   // restricts reads to verified, logged-in users for the in-app listing).
   const service = createServiceClient()
-  const { data: guides } = await service
-    .from('guides')
-    .select('id, title, slug, description, created_at')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false })
+  const [{ data: guides }, { data: manufacturers }] = await Promise.all([
+    service
+      .from('guides')
+      .select('id, title, slug, description, manufacturer_id, created_at')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false }),
+    service
+      .from('manufacturers')
+      .select('id, name, slug, logo_filename, display_order, created_at')
+      .order('display_order', { ascending: true }),
+  ])
+
+  const groups = groupGuidesByManufacturer(
+    (guides ?? []) as Guide[],
+    (manufacturers ?? []) as Manufacturer[]
+  )
 
   return (
     <>
@@ -61,19 +73,26 @@ export default async function Home() {
             Available Guides
           </h2>
 
-          {!guides || guides.length === 0 ? (
+          {groups.length === 0 ? (
             <p className="text-center text-text-muted">No guides available yet.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(guides as Guide[]).map((guide) => (
-                <GuideCard
-                  key={guide.id}
-                  title={guide.title}
-                  slug={guide.slug}
-                  description={guide.description}
-                  badge={extractYearRange(guide.title)}
-                  ctaLabel={user ? 'View Guide' : 'Register Free to Download'}
-                />
+            <div className="space-y-12">
+              {groups.map((group) => (
+                <div key={group.manufacturer?.id ?? 'other'}>
+                  <ManufacturerGroupHeading manufacturer={group.manufacturer} />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {group.guides.map((guide) => (
+                      <GuideCard
+                        key={guide.id}
+                        title={guide.title}
+                        slug={guide.slug}
+                        description={guide.description}
+                        badge={extractYearRange(guide.title)}
+                        ctaLabel={user ? 'View Guide' : 'Register Free to Download'}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}

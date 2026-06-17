@@ -12,6 +12,16 @@ export interface Guide {
   description: string | null
   filename: string
   is_published: boolean
+  manufacturer_id: string | null
+  created_at: string
+}
+
+export interface Manufacturer {
+  id: string
+  name: string
+  slug: string
+  logo_filename: string
+  display_order: number
   created_at: string
 }
 

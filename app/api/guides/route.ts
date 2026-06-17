@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { groupGuidesByManufacturer } from '@/lib/guide-display'
+import type { Guide, Manufacturer } from '@/types'
 
 export async function GET() {
   const supabase = createClient()
@@ -27,16 +29,28 @@ export async function GET() {
 
   // 3. Return all published guides (the RLS policy also enforces this,
   //    but we query through the authed client so the policy applies)
-  const { data: guides, error } = await supabase
-    .from('guides')
-    .select('id, title, slug, description, created_at')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false })
+  const [{ data: guides, error }, { data: manufacturers, error: manufacturersError }] =
+    await Promise.all([
+      supabase
+        .from('guides')
+        .select('id, title, slug, description, manufacturer_id, created_at')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('manufacturers')
+        .select('id, name, slug, logo_filename, display_order, created_at')
+        .order('display_order', { ascending: true }),
+    ])
 
-  if (error) {
-    console.error('[GET /api/guides]', error)
+  if (error || manufacturersError) {
+    console.error('[GET /api/guides]', error ?? manufacturersError)
     return NextResponse.json({ error: 'Failed to load guides.' }, { status: 500 })
   }
 
-  return NextResponse.json({ guides })
+  const grouped = groupGuidesByManufacturer(
+    (guides ?? []) as Guide[],
+    (manufacturers ?? []) as Manufacturer[]
+  )
+
+  return NextResponse.json({ manufacturers: grouped })
 }
