@@ -2,6 +2,9 @@
 -- Run in the Supabase SQL editor.
 -- Replaces all existing manufacturers rows.
 
+-- Clear the FK on guides first so the DELETE doesn't violate the constraint.
+UPDATE public.guides SET manufacturer_id = NULL;
+
 DELETE FROM public.manufacturers;
 
 INSERT INTO public.manufacturers (name, slug, logo_filename, display_order) VALUES
@@ -62,3 +65,8 @@ INSERT INTO public.manufacturers (name, slug, logo_filename, display_order) VALU
   ('Geely', 'geely', 'geely.svg', 55),
   ('NIO', 'nio', 'nio.svg', 56),
   ('Xpeng', 'xpeng', 'xpeng.svg', 57);
+
+-- Re-link existing guides to their new manufacturer rows.
+UPDATE public.guides
+SET manufacturer_id = (SELECT id FROM public.manufacturers WHERE slug = 'land-rover')
+WHERE slug = 'range-rover-l322';
