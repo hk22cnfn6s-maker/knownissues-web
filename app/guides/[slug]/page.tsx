@@ -187,6 +187,29 @@ export default async function GuidePage({
             </div>
           )}
         </section>
+
+        {/* Copyright notice */}
+        <section className="border-t border-border mt-10 pt-6">
+          <p className="text-sm text-text-muted leading-relaxed">
+            © KnownIssues.co.uk — Written by Kelly Jones. This guide is the
+            original work of the author and is protected by copyright.
+            Licensed under Creative Commons{' '}
+            <a
+              href="https://creativecommons.org/licenses/by-nc-nd/4.0/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-text-secondary"
+            >
+              CC BY-NC-ND 4.0
+            </a>
+            . You are welcome to share a link to this page with full
+            attribution. Reproduction of substantial content without written
+            permission is prohibited.{' '}
+            <a href="/terms" className="underline hover:text-text-secondary">
+              Terms of use →
+            </a>
+          </p>
+        </section>
       </main>
 
       <Footer />
