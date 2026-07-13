@@ -9,22 +9,19 @@ import {
   Preview,
   Section,
   Text,
-  Button,
 } from '@react-email/components'
 
 export interface GuideDeliveryEmailProps {
   guideTitle: string
-  downloadUrl: string
 }
 
 export default function GuideDeliveryEmail({
   guideTitle,
-  downloadUrl,
 }: GuideDeliveryEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Your download link for {guideTitle}</Preview>
+      <Preview>Your copy of {guideTitle} is attached</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
@@ -34,23 +31,9 @@ export default function GuideDeliveryEmail({
           <Section style={body}>
             <Heading style={h1}>Here's your guide</Heading>
             <Text style={paragraph}>
-              Thanks for downloading <strong>{guideTitle}</strong>. Click the
-              button below to get your PDF.
-            </Text>
-
-            <Section style={{ textAlign: 'center', margin: '32px 0' }}>
-              <Button style={button} href={downloadUrl}>
-                Download {guideTitle}
-              </Button>
-            </Section>
-
-            <Text style={smallText}>
-              Or copy and paste this link into your browser:
-            </Text>
-            <Text style={linkText}>
-              <Link href={downloadUrl} style={{ color: '#000000' }}>
-                {downloadUrl}
-              </Link>
+              Thanks for downloading <strong>{guideTitle}</strong>. Your PDF
+              is attached to this email, watermarked with your account
+              details for your personal use only.
             </Text>
           </Section>
 
@@ -58,8 +41,7 @@ export default function GuideDeliveryEmail({
 
           <Section style={footer}>
             <Text style={footerText}>
-              This link expires in 5 minutes. If it has expired, log back in
-              to{' '}
+              Lost the attachment? Log back in to{' '}
               <Link href="https://knownissues.co.uk" style={{ color: '#888888' }}>
                 knownissues.co.uk
               </Link>{' '}
@@ -119,32 +101,6 @@ const paragraph = {
   fontSize: '15px',
   lineHeight: '1.6',
   color: '#444444',
-}
-
-const button = {
-  backgroundColor: '#000000',
-  borderRadius: '4px',
-  color: '#ffffff',
-  fontSize: '15px',
-  fontWeight: 600,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '14px 28px',
-  letterSpacing: '0.1px',
-}
-
-const smallText = {
-  margin: '0 0 8px',
-  fontSize: '13px',
-  color: '#888888',
-}
-
-const linkText = {
-  margin: 0,
-  fontSize: '13px',
-  color: '#888888',
-  wordBreak: 'break-all' as const,
 }
 
 const hr = {

@@ -1,5 +1,4 @@
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 function getR2Client(): S3Client {
   const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID
@@ -16,24 +15,20 @@ function getR2Client(): S3Client {
 }
 
 /**
- * Generate a pre-signed GET URL for a PDF in R2.
- * @param filename  The key / filename stored in R2 (e.g. "l322-buyers-guide.pdf")
- * @param expiresIn Seconds until the URL expires (default 300 = 5 minutes)
+ * Fetch a PDF's raw bytes from R2 into memory so it can be processed
+ * (e.g. watermarked) server-side before being served to the client.
+ * @param filename The key / filename stored in R2 (e.g. "l322-buyers-guide.pdf")
  */
-export async function getSignedDownloadUrl(
-  filename: string,
-  expiresIn = 300
-): Promise<string> {
+export async function getObjectBuffer(filename: string): Promise<Buffer> {
   const client = getR2Client()
   const bucket = process.env.CLOUDFLARE_R2_BUCKET_NAME
   if (!bucket) throw new Error('CLOUDFLARE_R2_BUCKET_NAME is not set')
 
-  const command = new GetObjectCommand({
-    Bucket: bucket,
-    Key: filename,
-    // Suggest the browser save with the original filename
-    ResponseContentDisposition: `attachment; filename="${filename}"`,
-  })
+  const command = new GetObjectCommand({ Bucket: bucket, Key: filename })
+  const response = await client.send(command)
 
-  return getSignedUrl(client, command, { expiresIn })
+  if (!response.Body) throw new Error(`Empty response body from R2 for ${filename}`)
+
+  const bytes = await response.Body.transformToByteArray()
+  return Buffer.from(bytes)
 }

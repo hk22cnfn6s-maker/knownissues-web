@@ -98,9 +98,10 @@ export async function sendVerificationEmail(
 export async function sendGuideDeliveryEmail(
   to: string,
   guideTitle: string,
-  downloadUrl: string
+  pdfBuffer: Buffer,
+  pdfFilename: string
 ): Promise<void> {
-  const element = GuideDeliveryEmail({ guideTitle, downloadUrl })
+  const element = GuideDeliveryEmail({ guideTitle })
 
   const html = await render(element)
   const text = await render(element, { plainText: true })
@@ -112,5 +113,6 @@ export async function sendGuideDeliveryEmail(
     subject: `Your ${guideTitle} — KnownIssues.co.uk`,
     html,
     text,
+    attachments: [{ filename: pdfFilename, content: pdfBuffer }],
   })
 }

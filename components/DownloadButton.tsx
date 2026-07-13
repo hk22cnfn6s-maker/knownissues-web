@@ -20,23 +20,28 @@ export default function DownloadButton({ slug }: { slug: string }) {
         method: 'POST',
       })
 
-      const data = await res.json()
-
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
         setState({ status: 'error', message: data.error ?? 'Download failed.' })
         return
       }
 
-      // Trigger the download by navigating to the signed URL in a new tab.
-      // This avoids popup-blockers (the URL is opened synchronously in the
-      // click handler chain) and lets the browser handle the PDF download.
+      // The response body is the watermarked PDF itself — save it via a
+      // blob URL rather than navigating to a redirect URL.
+      const blob = await res.blob()
+      const filename =
+        res.headers
+          .get('Content-Disposition')
+          ?.match(/filename="?([^"]+)"?/)?.[1] ?? `${slug}.pdf`
+
+      const blobUrl = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = data.url
-      a.target = '_blank'
-      a.rel = 'noopener noreferrer'
+      a.href = blobUrl
+      a.download = filename
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
 
       setState({ status: 'done' })
     } catch {

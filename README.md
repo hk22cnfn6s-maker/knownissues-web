@@ -72,10 +72,11 @@ Each guide can be downloaded once per **30 days**, enforced two ways on every re
 
 If either check finds a recent download, the request is rejected with a `429` and a message telling the user the exact date they can download again (30 days from their last download). If both checks pass:
 
-1. A signed Cloudflare R2 URL is generated for the guide's PDF, expiring after **5 minutes**.
-2. The download is logged to the `downloads` table (`user_id`, `guide_id`, timestamp, IP address).
-3. The same signed URL is also emailed to the user via Resend as a backup copy.
-4. The signed URL is returned to the client, which immediately triggers the browser download.
+1. The guide's raw PDF bytes are fetched from Cloudflare R2 into memory (`lib/r2.ts`, `getObjectBuffer`).
+2. The PDF is watermarked server-side with `pdf-lib` (`lib/watermark.ts`) — a diagonal "KnownIssues.co.uk" mark on every page, plus a footer identifying the downloading user's email. Nothing watermarked is written back to R2; it's regenerated fresh on every request.
+3. The download is logged to the `downloads` table (`user_id`, `guide_id`, timestamp, IP address).
+4. The same watermarked PDF is emailed to the user via Resend as an attachment (backup copy).
+5. The watermarked PDF is streamed back to the client directly as the response body (`Content-Type: application/pdf`, `Content-Disposition: attachment`), triggering the browser download.
 
 ## Project structure
 

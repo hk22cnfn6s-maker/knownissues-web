@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { getSignedDownloadUrl } from '@/lib/r2'
+import { getObjectBuffer } from '@/lib/r2'
+import { watermarkPdf } from '@/lib/watermark'
 import { sendGuideDeliveryEmail } from '@/lib/email'
 
 const RATE_LIMIT_DAYS = 30
@@ -122,10 +123,11 @@ export async function POST(
       }
     }
 
-    // ── 5. Generate signed R2 URL (5-minute expiry) ────────────────────────────
-    const signedUrl = await getSignedDownloadUrl(guide.filename)
+    // ── 5. Fetch the raw PDF from R2 and stamp it with a per-download watermark ─
+    const rawPdf = await getObjectBuffer(guide.filename)
+    const watermarkedPdf = await watermarkPdf(rawPdf, user.email ?? 'unknown user')
 
-    // ── 6. Log the download ────────────────────────────────────────────────────
+    // ── 6. Log the download (before serving the file) ──────────────────────────
     const { error: insertError } = await service.from('downloads').insert({
       user_id: user.id,
       guide_id: guide.id,
@@ -133,21 +135,32 @@ export async function POST(
     })
 
     if (insertError) {
-      // Non-fatal: URL already generated — log but still return it
+      // Non-fatal: file is ready — log but still serve it
       console.error('[download] failed to log download:', insertError)
     }
 
-    // ── 7. Email the guide to the user (non-fatal if it fails) ────────────────
+    // ── 7. Email the watermarked guide to the user (non-fatal if it fails) ─────
     if (user.email) {
       try {
-        await sendGuideDeliveryEmail(user.email, guide.title, signedUrl)
+        await sendGuideDeliveryEmail(user.email, guide.title, watermarkedPdf, guide.filename)
       } catch (emailError) {
         console.error('[download] failed to send delivery email:', emailError)
       }
     }
 
-    // ── 8. Return the signed URL ───────────────────────────────────────────────
-    return NextResponse.json({ url: signedUrl })
+    // ── 8. Serve the watermarked PDF directly ───────────────────────────────────
+    // Copy into a plain Uint8Array — Buffer's ArrayBufferLike type isn't
+    // directly assignable to the DOM BodyInit/BlobPart types.
+    const body = new Uint8Array(watermarkedPdf)
+
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${guide.filename}"`,
+        'Content-Length': String(watermarkedPdf.length),
+      },
+    })
   } catch (err) {
     console.error('[POST /api/guides/[slug]/download]', err)
     return NextResponse.json(
