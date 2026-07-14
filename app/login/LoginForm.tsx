@@ -9,6 +9,7 @@ export default function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const justVerified = searchParams.get('verified') === '1'
+  const justReset = searchParams.get('reset') === '1'
   const redirectTo = searchParams.get('redirectTo') ?? '/dashboard'
 
   const [email, setEmail] = useState('')
@@ -57,6 +58,12 @@ export default function LoginForm() {
         </p>
       )}
 
+      {justReset && (
+        <p className="text-sm text-green-800 bg-green-50 border border-green-200 rounded-sm px-3 py-2 mb-4">
+          Password updated successfully — please log in
+        </p>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-text-primary mb-1">
@@ -87,6 +94,12 @@ export default function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full min-h-[44px] border border-border rounded-sm px-3 py-2 text-sm text-text-primary placeholder-text-muted bg-surface focus:outline-none focus:border-accent transition-colors"
           />
+          <Link
+            href="/forgot-password"
+            className="block text-xs text-text-muted hover:text-accent transition-colors mt-1 text-right"
+          >
+            Forgot your password?
+          </Link>
         </div>
 
         {error && (
