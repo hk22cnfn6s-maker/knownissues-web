@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 
@@ -10,6 +11,8 @@ const navLinks = [
   { label: 'About', href: '/#about' },
   { label: 'How It Works', href: '/#how-it-works' },
 ]
+
+const secondaryButtonOnDark = '!border-white !text-white hover:!bg-white hover:!text-text-primary'
 
 export default function Header({
   isAuthenticated = false,
@@ -30,16 +33,20 @@ export default function Header({
 
   return (
     <header
-      className={`sticky top-0 z-50 bg-surface/95 backdrop-blur-sm transition-shadow ${
+      className={`sticky top-0 z-50 bg-[#1a1a1a]/95 backdrop-blur-sm transition-shadow ${
         scrolled ? 'shadow-md' : ''
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link
-          href="/"
-          className="font-heading text-xl font-semibold text-text-primary tracking-tight"
-        >
-          KnownIssues<span className="text-accent">.co.uk</span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/ki-logo-horizontal-dark.svg"
+            alt="KnownIssues.co.uk"
+            width={209}
+            height={44}
+            className="h-11 w-auto"
+            priority
+          />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
@@ -47,7 +54,7 @@ export default function Header({
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+              className="text-sm font-medium text-white/70 hover:text-white transition-colors"
             >
               {link.label}
             </Link>
@@ -57,7 +64,7 @@ export default function Header({
         <div className="hidden md:flex items-center gap-3">
           {isAuthenticated ? (
             <>
-              <Button href="/dashboard" variant="secondary">
+              <Button href="/dashboard" variant="secondary" className={secondaryButtonOnDark}>
                 Dashboard
               </Button>
               <form action="/api/auth/logout" method="POST">
@@ -68,7 +75,7 @@ export default function Header({
             </>
           ) : (
             <>
-              <Button href="/login" variant="secondary">
+              <Button href="/login" variant="secondary" className={secondaryButtonOnDark}>
                 Login
               </Button>
               <Button href="/register" variant="primary">
@@ -84,7 +91,7 @@ export default function Header({
           aria-label="Toggle menu"
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((open) => !open)}
-          className="md:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 text-text-primary"
+          className="md:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 text-white"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {menuOpen ? (
@@ -98,14 +105,14 @@ export default function Header({
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-border bg-surface px-4 sm:px-6 py-4 space-y-4">
+        <div className="md:hidden border-t border-white/10 bg-dark-surface px-4 sm:px-6 py-4 space-y-4">
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="py-3 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                className="py-3 text-sm font-medium text-white/70 hover:text-white transition-colors"
               >
                 {link.label}
               </Link>
@@ -115,7 +122,11 @@ export default function Header({
           <div className="flex flex-col gap-3 pt-2">
             {isAuthenticated ? (
               <>
-                <Button href="/dashboard" variant="secondary" className="w-full">
+                <Button
+                  href="/dashboard"
+                  variant="secondary"
+                  className={`w-full ${secondaryButtonOnDark}`}
+                >
                   Dashboard
                 </Button>
                 <form action="/api/auth/logout" method="POST">
@@ -126,7 +137,11 @@ export default function Header({
               </>
             ) : (
               <>
-                <Button href="/login" variant="secondary" className="w-full">
+                <Button
+                  href="/login"
+                  variant="secondary"
+                  className={`w-full ${secondaryButtonOnDark}`}
+                >
                   Login
                 </Button>
                 <Button href="/register" variant="primary" className="w-full">

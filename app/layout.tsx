@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   title: "KnownIssues.co.uk — Know exactly what you're buying",
   description:
     "Expert used car buyers guides written by real owners. No fluff, no filler — just the known issues, common faults, and honest advice you need before handing over your money.",
+  icons: {
+    icon: "/ki-icon-appicon.svg",
+  },
 };
 
 export default function RootLayout({
