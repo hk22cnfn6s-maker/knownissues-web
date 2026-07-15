@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { extractYearRange } from '@/lib/guide-display'
 import DownloadButton from '@/components/DownloadButton'
@@ -35,7 +36,7 @@ export default async function GuidePage({
 
   const { data: guide } = await service
     .from('guides')
-    .select('id, title, slug, description, filename, is_published, created_at')
+    .select('id, title, slug, description, filename, is_published, cover_image, created_at')
     .eq('slug', params.slug)
     .eq('is_published', true)
     .single()
@@ -44,6 +45,7 @@ export default async function GuidePage({
 
   const g = guide as Guide
   const yearRange = extractYearRange(g.title)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
   let isVerified = false
   if (user) {
@@ -86,30 +88,72 @@ export default async function GuidePage({
     <>
       <Header isAuthenticated={Boolean(user)} />
 
-      {/* Hero */}
-      <section className="bg-dark-surface text-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-          <p className="text-xs text-white/50 mb-4">
-            <a href="/guides" className="hover:text-white transition-colors">
-              Guides
-            </a>
-            {' / '}
-            <span className="text-white/70">{g.title}</span>
-          </p>
+      {g.cover_image ? (
+        <>
+          {/* Cover image */}
+          <div className="relative w-full h-[400px]">
+            <Image
+              src={`${siteUrl}/api/images/${g.cover_image}`}
+              alt={g.title}
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-background" />
+          </div>
 
-          {yearRange && (
-            <Badge variant="amber" className="mb-4">
-              {yearRange}
-            </Badge>
-          )}
+          {/* Title (light background, follows straight on from the image) */}
+          <section className="bg-background">
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-2">
+              <p className="text-xs text-text-muted mb-4">
+                <a href="/guides" className="hover:text-text-primary transition-colors">
+                  Guides
+                </a>
+                {' / '}
+                <span className="text-text-secondary">{g.title}</span>
+              </p>
 
-          <h1 className="font-heading text-3xl sm:text-h1 text-white text-balance mb-6">
-            {g.title}
-          </h1>
+              {yearRange && (
+                <Badge variant="amber" className="mb-4">
+                  {yearRange}
+                </Badge>
+              )}
 
-          <div className="w-12 h-1 bg-accent" />
-        </div>
-      </section>
+              <h1 className="font-heading text-3xl sm:text-h1 text-text-primary text-balance mb-6">
+                {g.title}
+              </h1>
+
+              <div className="w-12 h-1 bg-accent" />
+            </div>
+          </section>
+        </>
+      ) : (
+        /* Hero */
+        <section className="bg-dark-surface text-white">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+            <p className="text-xs text-white/50 mb-4">
+              <a href="/guides" className="hover:text-white transition-colors">
+                Guides
+              </a>
+              {' / '}
+              <span className="text-white/70">{g.title}</span>
+            </p>
+
+            {yearRange && (
+              <Badge variant="amber" className="mb-4">
+                {yearRange}
+              </Badge>
+            )}
+
+            <h1 className="font-heading text-3xl sm:text-h1 text-white text-balance mb-6">
+              {g.title}
+            </h1>
+
+            <div className="w-12 h-1 bg-accent" />
+          </div>
+        </section>
+      )}
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
         {/* What's covered */}

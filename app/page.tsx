@@ -22,7 +22,7 @@ export default async function Home() {
   const [{ data: guides }, { data: manufacturers }] = await Promise.all([
     service
       .from('guides')
-      .select('id, title, slug, description, manufacturer_id, created_at')
+      .select('id, title, slug, description, manufacturer_id, cover_image, created_at')
       .eq('is_published', true)
       .order('created_at', { ascending: false }),
     service
@@ -88,6 +88,7 @@ export default async function Home() {
                         slug={guide.slug}
                         description={guide.description}
                         badge={extractYearRange(guide.title)}
+                        coverImage={guide.cover_image}
                         ctaLabel={user ? 'View Guide' : 'Register Free to Download'}
                       />
                     ))}

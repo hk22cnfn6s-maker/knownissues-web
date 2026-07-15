@@ -13,6 +13,7 @@ export interface Guide {
   filename: string
   is_published: boolean
   manufacturer_id: string | null
+  cover_image: string | null
   created_at: string
 }
 

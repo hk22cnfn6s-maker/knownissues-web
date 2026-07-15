@@ -32,7 +32,7 @@ export default async function DashboardPage() {
       service.from('users_profile').select('email').eq('id', user.id).single(),
       service
         .from('guides')
-        .select('id, title, slug, description, created_at')
+        .select('id, title, slug, description, cover_image, created_at')
         .eq('is_published', true)
         .order('created_at', { ascending: false }),
       service
@@ -118,6 +118,7 @@ export default async function DashboardPage() {
                   slug={guide.slug}
                   description={guide.description}
                   badge={extractYearRange(guide.title)}
+                  coverImage={guide.cover_image}
                   ctaLabel="View Guide"
                 />
               ))}

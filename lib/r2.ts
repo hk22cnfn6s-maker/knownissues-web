@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 
 function getR2Client(): S3Client {
   const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID
@@ -15,13 +15,16 @@ function getR2Client(): S3Client {
 }
 
 /**
- * Fetch a PDF's raw bytes from R2 into memory so it can be processed
- * (e.g. watermarked) server-side before being served to the client.
+ * Fetch an object's raw bytes from R2 into memory (e.g. to watermark a PDF
+ * server-side, or serve an image through an internal API route).
  * @param filename The key / filename stored in R2 (e.g. "l322-buyers-guide.pdf")
+ * @param bucket Defaults to CLOUDFLARE_R2_BUCKET_NAME (the guides bucket)
  */
-export async function getObjectBuffer(filename: string): Promise<Buffer> {
+export async function getObjectBuffer(
+  filename: string,
+  bucket: string | undefined = process.env.CLOUDFLARE_R2_BUCKET_NAME
+): Promise<Buffer> {
   const client = getR2Client()
-  const bucket = process.env.CLOUDFLARE_R2_BUCKET_NAME
   if (!bucket) throw new Error('CLOUDFLARE_R2_BUCKET_NAME is not set')
 
   const command = new GetObjectCommand({ Bucket: bucket, Key: filename })
@@ -31,4 +34,21 @@ export async function getObjectBuffer(filename: string): Promise<Buffer> {
 
   const bytes = await response.Body.transformToByteArray()
   return Buffer.from(bytes)
+}
+
+export async function putObject(
+  bucket: string,
+  key: string,
+  body: Buffer,
+  contentType: string
+): Promise<void> {
+  const client = getR2Client()
+  await client.send(
+    new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: contentType })
+  )
+}
+
+export async function deleteObject(bucket: string, key: string): Promise<void> {
+  const client = getR2Client()
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
 }

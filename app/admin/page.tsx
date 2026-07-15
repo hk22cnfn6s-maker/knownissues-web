@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import GuideToggle from '@/components/GuideToggle'
+import GuideImageManager from '@/components/admin/GuideImageManager'
 import ResourcesManager from '@/components/admin/ResourcesManager'
 import MagazineReferencesManager from '@/components/admin/MagazineReferencesManager'
 
@@ -52,7 +53,7 @@ export default async function AdminPage() {
       .limit(10),
     service
       .from('guides')
-      .select('id, title, slug, is_published, created_at')
+      .select('id, title, slug, is_published, cover_image, created_at')
       .order('created_at', { ascending: false }),
   ])
 
@@ -183,29 +184,33 @@ export default async function AdminPage() {
           <h2 className="font-heading text-h4 text-text-primary mb-4">
             Guide management
           </h2>
-          <div className="bg-surface border border-border rounded-sm overflow-hidden">
+          <div className="bg-surface border border-border rounded-sm overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-background text-left text-xs text-text-muted">
                   <th className="px-4 py-2 font-medium">Title</th>
                   <th className="px-4 py-2 font-medium">Slug</th>
                   <th className="px-4 py-2 font-medium">Status</th>
+                  <th className="px-4 py-2 font-medium">Cover image</th>
                 </tr>
               </thead>
               <tbody>
                 {(guides ?? []).length === 0 ? (
                   <tr>
-                    <td className="px-4 py-3 text-text-muted" colSpan={3}>
+                    <td className="px-4 py-3 text-text-muted" colSpan={4}>
                       No guides yet.
                     </td>
                   </tr>
                 ) : (
                   guides!.map((g) => (
                     <tr key={g.id} className="border-t border-border">
-                      <td className="px-4 py-2 text-text-primary">{g.title}</td>
-                      <td className="px-4 py-2 text-text-secondary">{g.slug}</td>
+                      <td className="px-4 py-2 text-text-primary whitespace-nowrap">{g.title}</td>
+                      <td className="px-4 py-2 text-text-secondary whitespace-nowrap">{g.slug}</td>
                       <td className="px-4 py-2">
                         <GuideToggle guideId={g.id} isPublished={g.is_published} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <GuideImageManager guideId={g.id} initialCoverImage={g.cover_image} />
                       </td>
                     </tr>
                   ))
