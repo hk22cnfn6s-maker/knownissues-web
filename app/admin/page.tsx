@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import GuideToggle from '@/components/GuideToggle'
+import ResourcesManager from '@/components/admin/ResourcesManager'
 
 export const dynamic = 'force-dynamic'
 
@@ -211,6 +212,11 @@ export default async function AdminPage() {
               </tbody>
             </table>
           </div>
+        </section>
+
+        {/* Affiliate resources */}
+        <section className="mt-14">
+          <ResourcesManager />
         </section>
       </main>
     </div>

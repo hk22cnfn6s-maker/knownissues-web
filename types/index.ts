@@ -40,3 +40,25 @@ export interface VerificationToken {
   expires_at: string
   used: boolean
 }
+
+export interface ResourceItem {
+  id: string
+  section_id: string
+  name: string
+  description: string | null
+  url: string
+  badge: string | null
+  tag: string | null
+  display_order: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface ResourceSection {
+  id: string
+  title: string
+  description: string | null
+  display_order: number
+  created_at: string
+  items: ResourceItem[]
+}
