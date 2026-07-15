@@ -3,6 +3,7 @@ import Link from 'next/link'
 const links = [
   { label: 'Guides', href: '/#guides' },
   { label: 'Resources', href: '/resources' },
+  { label: 'In the Press', href: '/magazine-references' },
   { label: 'About', href: '/#about' },
   { label: 'Privacy Policy', href: '/privacy' },
   { label: 'Terms', href: '/terms' },

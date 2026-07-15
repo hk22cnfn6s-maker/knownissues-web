@@ -62,3 +62,26 @@ export interface ResourceSection {
   created_at: string
   items: ResourceItem[]
 }
+
+export type ReferenceType = 'print' | 'web'
+
+export interface MagazineReferenceGuideLink {
+  id: string
+  title: string
+  slug: string
+}
+
+export interface MagazineReference {
+  id: string
+  magazine: string
+  issue_number: string | null
+  issue_date: string | null
+  article_title: string | null
+  url: string | null
+  notes: string | null
+  reference_type: ReferenceType
+  display_order: number
+  is_active: boolean
+  created_at: string
+  guides: MagazineReferenceGuideLink[]
+}

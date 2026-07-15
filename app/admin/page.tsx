@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import GuideToggle from '@/components/GuideToggle'
 import ResourcesManager from '@/components/admin/ResourcesManager'
+import MagazineReferencesManager from '@/components/admin/MagazineReferencesManager'
 
 export const dynamic = 'force-dynamic'
 
@@ -217,6 +218,11 @@ export default async function AdminPage() {
         {/* Affiliate resources */}
         <section className="mt-14">
           <ResourcesManager />
+        </section>
+
+        {/* Magazine references */}
+        <section className="mt-14">
+          <MagazineReferencesManager />
         </section>
       </main>
     </div>
