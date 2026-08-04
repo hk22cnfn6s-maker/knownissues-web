@@ -42,6 +42,17 @@ export default function Footer() {
             © {new Date().getFullYear()} KnownIssues.co.uk. All rights reserved.
           </p>
         </div>
+
+        <div className="mt-8 pt-8 border-t border-white/10 text-center">
+          <a
+            href="https://ko-fi.com/knownissues"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-white/40 hover:text-accent transition-colors"
+          >
+            ☕ Support KnownIssues on Ko-fi
+          </a>
+        </div>
       </div>
     </footer>
   )

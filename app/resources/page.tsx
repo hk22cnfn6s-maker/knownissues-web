@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import ResourceCard from '@/components/ui/ResourceCard'
+import Button from '@/components/ui/Button'
 import type { ResourceSection } from '@/types'
 
 export const metadata = {
@@ -73,7 +74,24 @@ export default async function ResourcesPage() {
           </div>
         )}
 
-        <div className="mt-20 pt-8 border-t border-border">
+        <div className="mt-20 bg-surface border border-border rounded-sm p-8 text-center">
+          <h2 className="font-heading text-h3 text-text-primary mb-3">Support KnownIssues</h2>
+          <p className="text-sm text-text-muted leading-relaxed max-w-xl mx-auto mb-6">
+            All guides are free to download. If you've found one useful and want to say thanks,
+            you can support the site on Ko-fi — it helps keep the content independent and the
+            guides free.
+          </p>
+          <Button
+            variant="primary"
+            href="https://ko-fi.com/knownissues"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ☕ Buy me a coffee
+          </Button>
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-border">
           <p className="text-xs text-text-muted leading-relaxed max-w-2xl">
             Disclosure: Some links on this page are affiliate links. KnownIssues.co.uk may earn
             a small commission if you make a purchase through these links, at no additional
