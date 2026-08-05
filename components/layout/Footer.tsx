@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 const links = [
   { label: 'Guides', href: '/#guides' },
+  { label: 'Request a Guide', href: '/request-a-guide' },
   { label: 'Resources', href: '/resources' },
   { label: 'In the Press', href: '/magazine-references' },
   { label: 'About', href: '/#about' },
