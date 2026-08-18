@@ -28,6 +28,26 @@ export function createClient() {
 }
 
 /**
+ * Anon-key client with no cookie persistence — validates credentials via
+ * signInWithPassword()/getUser() without writing a session onto the
+ * response. Used by the login route to check a password before deciding
+ * whether the account needs a 2FA step first; the real session is only
+ * persisted afterwards, via createClient().auth.setSession().
+ */
+export function createEphemeralClient() {
+  return createSupabaseJsClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
+}
+
+/**
  * Service-role client — never expose to the browser.
  *
  * Deliberately built with plain @supabase/supabase-js rather than

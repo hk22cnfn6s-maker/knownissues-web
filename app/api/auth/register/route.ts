@@ -3,6 +3,8 @@ import { z } from 'zod'
 import crypto from 'crypto'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendVerificationEmail } from '@/lib/email'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { getIpAddress } from '@/lib/request-ip'
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -11,6 +13,17 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const rate = await checkRateLimit('register', getIpAddress(request), {
+      max: 5,
+      windowMinutes: 60,
+    })
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many registration attempts. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const parsed = schema.safeParse(body)
 

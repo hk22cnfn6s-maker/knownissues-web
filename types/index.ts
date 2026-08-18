@@ -3,6 +3,8 @@ export interface UserProfile {
   email: string
   created_at: string
   is_verified: boolean
+  totp_enabled: boolean
+  totp_verified_at: string | null
 }
 
 export interface Guide {

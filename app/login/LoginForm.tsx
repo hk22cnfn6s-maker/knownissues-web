@@ -36,6 +36,11 @@ export default function LoginForm() {
         return
       }
 
+      if (data.requires2fa) {
+        router.push('/verify-2fa')
+        return
+      }
+
       router.push(redirectTo)
       router.refresh()
     } catch {

@@ -3,16 +3,10 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getObjectBuffer } from '@/lib/r2'
 import { watermarkPdf } from '@/lib/watermark'
 import { sendGuideDeliveryEmail } from '@/lib/email'
+import { getIpAddress } from '@/lib/request-ip'
 
 const RATE_LIMIT_DAYS = 30
-
-function getIpAddress(request: NextRequest): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
-    request.headers.get('x-real-ip') ??
-    'unknown'
-  )
-}
+const HOURLY_LIMIT = 3
 
 /** Returns the earliest date the user/IP can download again, or null if they're clear. */
 function nextAllowedDate(downloadedAt: string): Date {
@@ -76,6 +70,23 @@ export async function POST(
     ).toISOString()
 
     const ipAddress = getIpAddress(request)
+
+    // Hard cap: even within the 30-day window below, guard against a
+    // burst of retries (e.g. a buggy client) hammering the same guide.
+    const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const { count: hourlyCount } = await service
+      .from('downloads')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('guide_id', guide.id)
+      .gte('downloaded_at', hourAgo)
+
+    if ((hourlyCount ?? 0) >= HOURLY_LIMIT) {
+      return NextResponse.json(
+        { error: 'Too many download attempts for this guide. Please try again in an hour.' },
+        { status: 429 }
+      )
+    }
 
     // Check by user_id
     const { data: userDownload } = await service

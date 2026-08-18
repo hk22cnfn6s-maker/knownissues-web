@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { getIpAddress } from '@/lib/request-ip'
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -8,6 +10,16 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const rate = await checkRateLimit('forgot-password', getIpAddress(request), {
+      max: 5,
+      windowMinutes: 60,
+    })
+    if (!rate.allowed) {
+      // Same shape as the normal response — don't reveal rate-limit state
+      // any more precisely than "try again later" to an anonymous caller.
+      return NextResponse.json({ success: true })
+    }
+
     const body = await request.json()
     const parsed = schema.safeParse(body)
 

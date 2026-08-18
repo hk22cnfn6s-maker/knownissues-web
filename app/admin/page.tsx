@@ -33,6 +33,7 @@ export default async function AdminPage() {
     { data: recentUsers },
     { data: recentDownloadsRaw },
     { data: guides },
+    { data: adminProfile },
   ] = await Promise.all([
     service.from('users_profile').select('*', { count: 'exact', head: true }),
     service
@@ -56,6 +57,7 @@ export default async function AdminPage() {
       .from('guides')
       .select('id, title, slug, is_published, cover_image, created_at')
       .order('created_at', { ascending: false }),
+    service.from('users_profile').select('totp_enabled').eq('id', admin.id).single(),
   ])
 
   const recentDownloads = (recentDownloadsRaw ?? []) as unknown as Array<{
@@ -72,6 +74,12 @@ export default async function AdminPage() {
           KnownIssues<span className="text-accent">.co.uk</span>
         </Link>
         <nav className="flex items-center gap-6">
+          <Link
+            href="/admin/setup-2fa"
+            className="text-sm text-white/70 hover:text-white transition-colors"
+          >
+            2FA settings
+          </Link>
           <span className="text-sm text-white/50">Admin</span>
           <form action="/api/auth/logout" method="POST">
             <button type="submit" className="text-sm text-white/70 hover:text-white transition-colors">
@@ -83,6 +91,21 @@ export default async function AdminPage() {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
         <h1 className="font-heading text-h2 text-text-primary mb-8">Admin dashboard</h1>
+
+        {!adminProfile?.totp_enabled && (
+          <div className="mb-8 bg-amber-50 border border-amber-300 rounded-sm px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-amber-900">
+              <span aria-hidden="true">⚠️</span> Two-factor authentication is not enabled. Your
+              admin account is protected by password only.
+            </p>
+            <Link
+              href="/admin/setup-2fa"
+              className="text-sm font-semibold text-amber-900 underline hover:no-underline whitespace-nowrap"
+            >
+              Set up 2FA now →
+            </Link>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-14">
