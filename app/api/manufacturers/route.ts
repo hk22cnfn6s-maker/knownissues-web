@@ -9,7 +9,7 @@ export async function GET() {
   const { data: manufacturers, error } = await service
     .from('manufacturers')
     .select('id, name, slug, display_order')
-    .order('display_order', { ascending: true })
+    .order('name', { ascending: true })
 
   if (error) {
     console.error('[GET /api/manufacturers]', error)
