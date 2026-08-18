@@ -51,16 +51,14 @@ export default function GuideUploadForm() {
 
   useEffect(() => {
     let cancelled = false
-    fetch('/api/guides')
+    fetch('/api/manufacturers')
       .then((res) => res.json())
       .then((data) => {
         if (cancelled) return
-        const groups = Array.isArray(data.manufacturers) ? data.manufacturers : []
-        const options: ManufacturerOption[] = groups
-          .map((g: { manufacturer: ManufacturerOption | null }) => g.manufacturer)
-          .filter((m: ManufacturerOption | null): m is ManufacturerOption => !!m)
-        const unique = Array.from(new Map(options.map((m) => [m.id, m])).values())
-        setManufacturers(unique)
+        const options: ManufacturerOption[] = Array.isArray(data.manufacturers)
+          ? data.manufacturers
+          : []
+        setManufacturers(options)
       })
       .catch(() => {
         if (!cancelled) setManufacturersError(true)
