@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import GuideToggle from '@/components/GuideToggle'
 import GuideImageManager from '@/components/admin/GuideImageManager'
+import GuideUploadForm from '@/components/admin/GuideUploadForm'
 import ResourcesManager from '@/components/admin/ResourcesManager'
 import MagazineReferencesManager from '@/components/admin/MagazineReferencesManager'
 
@@ -178,6 +179,9 @@ export default async function AdminPage() {
             </table>
           </div>
         </section>
+
+        {/* Upload guide */}
+        <GuideUploadForm />
 
         {/* Guide management */}
         <section>
